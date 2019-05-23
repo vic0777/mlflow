@@ -78,7 +78,7 @@ def train(training_data, max_runs, epochs, metric, algo, seed, training_experime
             :return: The metric value evaluated on the validation data.
             """
             import mlflow.tracking
-            lr, momentum = params
+            lr, momentum = params                       #优化的超参数没有batch size
             p = mlflow.projects.run(
                 uri=".",
                 entry_point="train",
