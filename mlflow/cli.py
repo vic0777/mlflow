@@ -113,7 +113,7 @@ def run(uri, entry_point, version, param_list, experiment_name, experiment_id, b
             eprint("Repeated parameter: '%s'" % name)
             sys.exit(1)
         param_dict[name] = value
-    cluster_spec_arg = backend_config
+    cluster_spec_arg = backend_config    #目前都支持哪些cluster_spec? databrics,..., 具体起什么作用？
     if backend_config is not None and os.path.splitext(backend_config)[-1] != ".json":
         try:
             cluster_spec_arg = json.loads(backend_config)

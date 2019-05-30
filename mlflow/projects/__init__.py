@@ -150,6 +150,7 @@ def _run(uri, experiment_id, entry_point="main", version=None, parameters=None,
                              "values: %s" % (backend, supported_backends))
 
 
+
 def run(uri, entry_point="main", version=None, parameters=None,
         experiment_name=None, experiment_id=None,
         backend=None, backend_config=None, use_conda=True,
@@ -162,6 +163,9 @@ def run(uri, entry_point="main", version=None, parameters=None,
     For information on using this method in chained workflows, see `Building Multistep Workflows
     <../projects.html#building-multistep-workflows>`_.
 
+    +++++++++++++++ backend参数的值只能是local或者databricks， 可以通过这参数集成kubeflow. 不需要对databricks的支持++++++++++++++++++++++
+    
+    
     :raises ``ExecutionException``: If a run launched in blocking mode is unsuccessful.
 
     :param uri: URI of project to run. A local filesystem path

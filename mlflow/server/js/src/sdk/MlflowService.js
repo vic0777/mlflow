@@ -5,6 +5,8 @@
  *   This file is generated. For now, it is a snapshot of the proto services as of
  *   Aug 1, 2018 3:42:41 PM. We will update the generation pipeline to actually
  *   place these generated objects in the correct location shortly.
+ *   
+ *   应该是根据mlflow/protos/service.proto生成的。Ajax的消息内容是ProtocolBuffer格式的
  */
 
 import $ from 'jquery';

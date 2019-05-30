@@ -108,6 +108,7 @@ class SqlRun(Base):
     """
     User ID: `String` (limit 256 characters). Defaults to ``null``.
     """
+    
     status = Column(String(20), default=RunStatus.to_string(RunStatus.SCHEDULED))
     """
     Run Status: `String` (limit 20 characters). Can be one of ``RUNNING``, ``SCHEDULED`` (default),
