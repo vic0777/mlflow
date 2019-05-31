@@ -35,7 +35,7 @@ AgileAI新增的表
 """
 class SqlOnlineUser(Base):
     """
-    DB model for users of agileai.com�� These are recorded in ``online_user`` table
+    DB model for users of agileai.com. These are recorded in ``online_user`` table
     """
     __tablename__ = 'online_user'
     
