@@ -410,6 +410,252 @@ service MlflowService {
       rpc_doc_title: "Log Batch",
     };
   }
+  
+  
+  //=============================================================================================================
+  //Interface definition for AgileAI
+   
+  rpc createOnlineUser (CreateOnlineUser) returns (CreateOnlineUser.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/onlineuser/create"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/onlineuser/create"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Create Onlineuser",
+    };
+  }
+  
+  rpc deleteOnlineUser (DeleteOnlineUser) returns (DeleteOnlineUser.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/onlineuser/delete"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/onlineuser/delete"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Delete Onlineuser",
+    };
+  }
+  
+  rpc getOnlineUser (GetOnlineUser) returns (GetOnlineUser.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "GET",
+        path: "/preview/mlflow/onlineuser/get"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "GET",
+        path: "/mlflow/onlineuser/get"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Get Onlineuser",
+    };
+  }
+  
+  rpc updateOnlineUser (UpdateOnlineUser) returns (UpdateOnlineUser.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/onlineuser/update"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/onlineuser/update"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Update Onlineuser",
+    };
+  }
+  
+  //POST or GET ?????
+  rpc loginIn (LoginIn) returns (LoginIn.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/onlineuser/loginin"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/onlineuser/loginin"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Loginin",
+    };
+  }
+  
+  rpc createWorkspace (CreateWorkspace) returns (CreateWorkspace.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/workspace/create"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/workspace/create"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Create Workspace",
+    };
+  }
+  
+  rpc delteWorkspace (DeleteWorkspace) returns (DeleteWorkspace.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/workspace/delete"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/workspace/delete"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Delete Workspace",
+    };
+  }
+  
+  rpc listWorkspace (ListWorkspace) returns (ListWorkspace.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "GET",
+        path: "/preview/mlflow/workspace/list"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "GET",
+        path: "/mlflow/workspace/list"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "List Workspace",
+    };
+  }
+  
+  rpc getWorkspace (GetWorkspace) returns (GetWorkspace.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "GET",
+        path: "/preview/mlflow/workspace/get"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "GET",
+        path: "/mlflow/workspace/get"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "get Workspace",
+    };
+  }
+  
+  rpc updateWorkspace (UpdateWorkspace) returns (UpdateWorkspace.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/workspace/update"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/workspace/update"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Update Workspace",
+    };
+  }
+  
+  rpc createProject (CreateProject) returns (CreateProject.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/project/create"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/project/create"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Create Project",
+    };
+  }
+  
+  rpc deleteProject (DeleteProject) returns (DeleteProject.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/project/delete"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/project/delete"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Delete Project",
+    };
+  }
+  
+  rpc listProject (ListProject) returns (ListProject.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "GET",
+        path: "/preview/mlflow/project/list"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "GET",
+        path: "/mlflow/project/list"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "List Project",
+    };
+  }
+  
+  rpc getProject (GetProject) returns (GetProject.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "GET",
+        path: "/preview/mlflow/project/get"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "GET",
+        path: "/mlflow/project/get"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "Get Project",
+    };
+  }
+  
+  rpc updateProject (UpdateProject) returns (UpdateProject.Response) {
+	option (rpc) = {
+      endpoints: [{
+        method: "POST",
+        path: "/preview/mlflow/project/update"
+        since { major: 2, minor: 0 },
+      }, {
+        method: "POST",
+        path: "/mlflow/project/update"
+        since { major: 2, minor: 0 },
+      }],
+      visibility: PUBLIC,
+      rpc_doc_title: "update Project",
+    };
+  }
+  
 }
 
 // View type for ListExperiments query.
@@ -433,6 +679,7 @@ enum SourceType {
   JOB = 2;
 
   // As a prepackaged project: either a Docker image or GitHub source, etc.
+  // !!! mlflow's project, not agileai's project !!!
   PROJECT = 3;
 
   // Local run: Using CLI, IDE, or local notebook.
