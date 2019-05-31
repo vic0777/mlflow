@@ -1,3 +1,5 @@
+#coding:utf-8
+
 import time
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import (
@@ -8,6 +10,7 @@ from mlflow.entities import (
     Experiment, RunTag, Metric, Param, RunData, RunInfo,
     SourceType, RunStatus, Run, ViewType)
 from mlflow.entities.lifecycle_stage import LifecycleStage
+from Demos.win32ts_logoff_disconnected import username
 
 Base = declarative_base()
 
@@ -27,7 +30,85 @@ RunStatusTypes = [
     RunStatus.to_string(RunStatus.RUNNING)
 ]
 
+"""
+AgileAI新增的表
+"""
+class SqlOnlineUser(Base):
+    """
+    DB model for users of agileai.com�� These are recorded in ``online_user`` table
+    """
+    __tablename__ = 'online_user'
+    
+    user_id = Column(Integer, autoincrement=True)
+    """
+    user_id: primary key of table ``online_user``
+    """
+    username = Column(String(256), unique=True, nullable=False)
+    password = Column(String(256), nullable=False)
+    email = Column(String(50), unique=True, nullable=False)
+    api_key = Column(String(50), unique=True, nullable=False)
+    
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', name='online_user_pk'),
+    )
 
+    def __repr__(self):
+        return '<SqlOnlineUser ({}, {})>'.format(self.user_id, self.username)
+    
+class SqlWorkspace(Base):
+    """
+    DB model for workspace of agileai.com. These are recorded in ``workspace`` table       
+    """
+    __tablename__ = 'workspace'
+    
+    workspace_id = Column(Integer, autoincrement=True)
+    """
+    workspace_id: primary key of table ``workspace``
+    """ 
+    name = Column(String(256), nullable=False)
+    """
+          同一个用户的workspace不能有重名的，不同用户不限制。要在程序代码里进行约束。
+    """
+    user_id = Column(Integer, ForeignKey('online_user.user_id'))
+    """
+    user_id: 外键， online_user表的user_id列
+    """
+    description = Column(String(1000))
+    
+    __table_args__ = (
+        PrimaryKeyConstraint('workspace_id', name='workspace_pk'),
+    )
+        
+
+class SqlProject(Base):
+    """
+    DB model for project of agileai.com. These are recorded in ``project`` table
+        注意：与mlflow的project不同，这个是网站上的project ！！！。 
+    """
+
+    __tablename__ = 'proect'
+    
+    project_id = Column(Integer, autoincrement=True)
+    workspace_id = Column(Integer, ForeignKey('workspace.workspace_id'))
+    """
+    workspace_id:外键， workspace表的workspace_id列
+    """
+    name = Column(String(256), nullable=False)
+    """
+         同一个workspace的project不能有重名的，不同workspace的不限制。要在程序代码里进行约束。
+    """
+    description = Column(String(1000))
+    
+    __table_args__ = (
+        PrimaryKeyConstraint('project_id', name='project_pk'),
+    )
+    
+    
+    
+"""
+==================================================================================================
+mlflow原有的表
+"""    
 class SqlExperiment(Base):
     """
     DB model for :py:class:`mlflow.entities.Experiment`. These are recorded in ``experiment`` table.
