@@ -410,11 +410,10 @@ service MlflowService {
       rpc_doc_title: "Log Batch",
     };
   }
-  
-  
-  //=============================================================================================================
-  //Interface definition for AgileAI
-   
+
+
+  //--------------------------------  Interface definition for AgileAI  -----------------------------------
+
   rpc createOnlineUser (CreateOnlineUser) returns (CreateOnlineUser.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -430,7 +429,7 @@ service MlflowService {
       rpc_doc_title: "Create Onlineuser",
     };
   }
-  
+
   rpc deleteOnlineUser (DeleteOnlineUser) returns (DeleteOnlineUser.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -446,7 +445,7 @@ service MlflowService {
       rpc_doc_title: "Delete Onlineuser",
     };
   }
-  
+
   rpc getOnlineUser (GetOnlineUser) returns (GetOnlineUser.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -462,7 +461,7 @@ service MlflowService {
       rpc_doc_title: "Get Onlineuser",
     };
   }
-  
+
   rpc updateOnlineUser (UpdateOnlineUser) returns (UpdateOnlineUser.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -478,24 +477,24 @@ service MlflowService {
       rpc_doc_title: "Update Onlineuser",
     };
   }
-  
+
   //POST or GET ?????
-  rpc loginIn (LoginIn) returns (LoginIn.Response) {
+  rpc signIn (SignIn) returns (SignIn.Response) {
 	option (rpc) = {
       endpoints: [{
         method: "POST",
-        path: "/preview/mlflow/onlineuser/loginin"
+        path: "/preview/mlflow/onlineuser/signin"
         since { major: 2, minor: 0 },
       }, {
         method: "POST",
-        path: "/mlflow/onlineuser/loginin"
+        path: "/mlflow/onlineuser/signin"
         since { major: 2, minor: 0 },
       }],
       visibility: PUBLIC,
-      rpc_doc_title: "Loginin",
+      rpc_doc_title: "SignIn",
     };
   }
-  
+
   rpc createWorkspace (CreateWorkspace) returns (CreateWorkspace.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -511,7 +510,7 @@ service MlflowService {
       rpc_doc_title: "Create Workspace",
     };
   }
-  
+
   rpc delteWorkspace (DeleteWorkspace) returns (DeleteWorkspace.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -527,7 +526,7 @@ service MlflowService {
       rpc_doc_title: "Delete Workspace",
     };
   }
-  
+
   rpc listWorkspace (ListWorkspace) returns (ListWorkspace.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -543,7 +542,7 @@ service MlflowService {
       rpc_doc_title: "List Workspace",
     };
   }
-  
+
   rpc getWorkspace (GetWorkspace) returns (GetWorkspace.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -559,7 +558,7 @@ service MlflowService {
       rpc_doc_title: "get Workspace",
     };
   }
-  
+
   rpc updateWorkspace (UpdateWorkspace) returns (UpdateWorkspace.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -575,7 +574,7 @@ service MlflowService {
       rpc_doc_title: "Update Workspace",
     };
   }
-  
+
   rpc createProject (CreateProject) returns (CreateProject.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -591,7 +590,7 @@ service MlflowService {
       rpc_doc_title: "Create Project",
     };
   }
-  
+
   rpc deleteProject (DeleteProject) returns (DeleteProject.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -607,7 +606,7 @@ service MlflowService {
       rpc_doc_title: "Delete Project",
     };
   }
-  
+
   rpc listProject (ListProject) returns (ListProject.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -623,7 +622,7 @@ service MlflowService {
       rpc_doc_title: "List Project",
     };
   }
-  
+
   rpc getProject (GetProject) returns (GetProject.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -639,7 +638,7 @@ service MlflowService {
       rpc_doc_title: "Get Project",
     };
   }
-  
+
   rpc updateProject (UpdateProject) returns (UpdateProject.Response) {
 	option (rpc) = {
       endpoints: [{
@@ -655,7 +654,7 @@ service MlflowService {
       rpc_doc_title: "update Project",
     };
   }
-  
+
 }
 
 // View type for ListExperiments query.
@@ -814,6 +813,12 @@ message Experiment {
 
   // Creation time
   optional int64 creation_time = 6;
+  
+  optional string desc = 7;
+  
+  optional int32 num_of_run = 8;
+  
+  repeated RunInfo run_info = 9;
 }
 
 message CreateExperiment {
@@ -1059,7 +1064,7 @@ message SearchRuns {
   // You cannot provide ``filter`` when ``anded_expressions`` is present; an ``INVALID_PARAMETER_VALUE``
   // error will be returned if both are specified.
   // If both ``filter`` and ``anded_expressions`` are absent, all runs part of the given experiments
-  // 
+  //
   optional string filter = 4;
 
   // Whether to display only active, only deleted, or all runs.
@@ -1142,5 +1147,213 @@ message LogBatch {
   // metrics, params, and tags in total.
   repeated RunTag tags = 4;
   message Response {
+  }
+}
+
+//-------------------------------------  Messages for AgileAI  --------------------------------------------------------
+message ExperimentInfo {
+  optional string name = 1;
+  optional string desc = 2;
+  //the number of run belong to this experiment
+  optional int32 num_of_run = 3;
+}
+
+message ProjectInfo {
+  optional string name = 1;
+  optional string desc = 2;
+  //the number of experiment belong to thiw project
+  optional int32 num_of_experiment = 3;
+}
+
+message Project {
+  optional ProjectInfo info = 1;
+  repeated ExperimentInfo experiment_info = 2;
+}
+
+message WorkspaceInfo {
+  optional string name = 1;
+  //description of the workspace
+  optional string desc = 2;
+  //the number of projects belong to this workspace
+  optional int32 num_of_project = 3;
+}
+
+message WorkspaceInfoList {
+  repeated WorkspaceInfo ws_info = 1;
+}
+
+message Workspace {
+  optional WorkspaceInfo info = 1;
+  //list of projects belong to this workspace
+  repeated ProjectInfo project_info = 2;
+}
+
+message CreateOnlineUser {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string username = 1 [(validate_required) = true];
+  optional string password = 2 [(validate_required) = true];
+  optional string email = 3 [(validate_required) = true];
+
+  // Unix timestamp in milliseconds of when the user is registered.
+  optional int64 register_time = 7;
+
+
+  message Response {
+    // true or false
+    required bool result = 1;
+  }
+}
+
+message DeleteOnlineUser {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string username = 1 [(validate_required) = true];
+
+  message Response {
+    // true or false
+    required bool result = 1;
+  }
+}
+
+message GetOnlineUser {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string username = 1 [(validate_required) = true];
+
+  message Response {
+    required string email = 1;
+  }
+}
+
+message UpdateOnlineUser {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string username = 1 [(validate_required) = true];
+  optional string password = 2;
+  optional string email = 3;
+
+  message Response {
+    required bool result = 1;
+  }
+}
+
+message SignIn {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string username = 1 [(validate_required) = true];
+  optional string password = 2 [(validate_required) = true];
+
+  message Response {
+    // TODO: detailed reason of sign in failure should be returned
+    required bool sign_in_result = 1;
+    // if sign_in_result is True, workspace_list should be returned
+    optional WorkspaceInfoList workspace_list = 2;
+  }
+}
+
+message CreateWorkspace {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string name = 1 [(validate_required) = true];
+  optional string username = 2 [(validate_required) = true];
+  optional string description = 3;
+
+  message Response {
+    required bool result = 1;
+  }
+}
+
+message DeleteWorkspace {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string name = 1 [(validate_required) = true];
+
+  message Response {
+    required bool result = 1;
+  }
+}
+
+message ListWorkspace {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string username = 1 [(validate_required) = true];
+
+  message Response {
+    optional WorkspaceInfoList workspace_list = 1;
+  }
+}
+
+message GetWorkspace {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string name = 1 [(validate_required) = true];
+
+  message Response {
+    optional Workspace workspace = 1;
+  }
+}
+
+message UpdateWorkspace {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string name = 1 [(validate_required) = true];
+  optional string desc = 2;
+
+  message Response {
+    required bool result = 1;
+  }
+}
+
+message CreateProject {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string ws_name = 1 [(validate_required) = true];
+  optional string name = 2 [(validate_required) = true];
+  optional string desc = 3;
+
+  message Response {
+    required bool result = 1;
+  }
+}
+
+message DeleteProject {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string name = 1 [(validate_required) = true];
+
+  message Response {
+    required bool result = 1;
+  }
+}
+
+message ListProject {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string ws_name = 1 [(validate_required) = true];
+
+  message Response {
+    optional ProjectInfo project_list = 1;
+  }
+}
+
+message GetProject {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string name = 1 [(validate_required) = true];
+
+  message Response {
+    optional Project project = 1;
+  }
+}
+
+message UpdateProject {
+  option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
+
+  optional string name = 1 [(validate_required) = true];
+  optional string desc = 2;
+
+  message Response {
+    optional bool result = 1;
   }
 }

@@ -1,3 +1,4 @@
 eclipse.preferences.version=1
 encoding//mlflow/entities/online_user.py=utf-8
+encoding//mlflow/protos/service_pb2.py=utf-8
 encoding//mlflow/store/dbmodels/models.py=utf-8
