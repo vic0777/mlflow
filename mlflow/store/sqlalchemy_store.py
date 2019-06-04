@@ -1,3 +1,4 @@
+#encoding:utf-8
 import logging
 import uuid
 from contextlib import contextmanager
@@ -10,7 +11,7 @@ import sqlalchemy
 from mlflow.entities.lifecycle_stage import LifecycleStage
 from mlflow.store import SEARCH_MAX_RESULTS_THRESHOLD
 from mlflow.store.dbmodels.db_types import MYSQL
-from mlflow.store.dbmodels.models import Base, SqlExperiment, SqlRun, SqlMetric, SqlParam, SqlTag
+from mlflow.store.dbmodels.models import Base, SqlExperiment, SqlRun, SqlMetric, SqlParam, SqlTag, SqlOnlineUser, SqlProject, SqlWorkspace
 from mlflow.entities import RunStatus, SourceType, Experiment
 from mlflow.store.abstract_store import AbstractStore
 from mlflow.entities import ViewType
@@ -23,7 +24,8 @@ from mlflow.utils.validation import _validate_batch_log_limits, _validate_batch_
     _validate_run_id, _validate_metric, _validate_db_type_string
 from mlflow.store.db.utils import _upgrade_db, _get_alembic_config, _get_schema_version
 from mlflow.store.dbmodels.initial_models import Base as InitialBase
-
+from _ast import Try
+from user.api_key import ApiKey
 
 _logger = logging.getLogger(__name__)
 
@@ -527,3 +529,72 @@ class SqlAlchemyStore(AbstractStore):
             raise e
         except Exception as e:
             raise MlflowException(e, INTERNAL_ERROR)
+    
+    
+    #--------------------------------------------- added by AgileAI --------------------------------------------------
+    def _isEmpty(self, param):
+        if param is None or param == '':
+            return True
+        return False    
+
+    def create_user(self, username, password, email):
+        #TODO: 除了判空，还应该加入更多的合法性检查，保证数据库中的字段没问题
+        if self._isEmpty(username) or self._isEmpty(password) or self._isEmpty(email):
+            raise MlflowException("username, password, and email cannot be empty")
+    
+        with self.ManagedSessionMaker() as session:
+            try:
+                user = SqlOnlineUser(username=username, password=password, email=email, 
+                                     api_key=ApiKey.generate(username))
+                session.add(user)
+            except sqlalchemy.exc.IntegrityError as e:
+                raise MlflowException('User(name={}) already exists. '
+                                      'Error: {}'.format(username, str(e)), RESOURCE_ALREADY_EXISTS)
+                
+    def sign_in(self, username, password):
+        with self.ManagedSessionMaker() as session:
+            users = session.query(SqlOnlineUser).filter(SqlOnlineUser.username == username).all()
+            
+            if len(users) == 0:
+                raise MlflowException('No user:{}'.format(username), RESOURCE_DOES_NOT_EXIST)
+            
+            if (users[0].password != password): 
+                raise MlflowException('wrong password')
+            
+        return users[0].user_id
+    
+    def get_workspace(self, user_id):
+        """
+        return all the workspace belong to the user
+        :rtype: :py:class: `mlflow.entities.WorkspaceInfoList`
+        """
+        with self.ManagedSessionMaker() as session:
+            workspaces = session.query(SqlWorkspace).filter(SqlWorkspace.user_id = user_id).all()
+    
+    def create_workspace(self, user_id, name, desc):
+        
+                
+    def get_project(self, workspace_id):
+        """
+        return all the projects belong to the workspace
+        :rtype: List of :py:class:`mlflow.entities.`
+        """
+    
+    def create_project(self, workspace_id, name, desc):
+    
+                
+                              
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
