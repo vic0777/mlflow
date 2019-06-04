@@ -21,7 +21,7 @@ class Project(_MLflowObject):
     def project_info(self):
         """
         The project metadata, such as name, desc, the number of experiments belong to this project
-        :rtype: :py:class:`mlflow.entries.ProjectInfo`
+        :rtype: :py:class:`mlflow.entities.ProjectInfo`
         """
         return self._project_info
     
