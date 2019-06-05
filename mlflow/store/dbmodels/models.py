@@ -86,7 +86,7 @@ class SqlProject(Base):
         注意：与mlflow的project不同，这个是网站上的project ！！！。 
     """
 
-    __tablename__ = 'proect'
+    __tablename__ = 'project'
     
     project_id = Column(Integer, autoincrement=True)
     workspace_id = Column(Integer, ForeignKey('workspace.workspace_id'))
