@@ -7,7 +7,6 @@ Created on 2019/6/3
 from mlflow.entities._mlflow_object import _MLflowObject
 from mlflow.protos.service_pb2 import Workspace as ProtoWorkspace
 from mlflow.entities.project_info import ProjectInfo
-from docs.source.conf import project
 
 class Workspace(_MLflowObject):
     def __init__(self, info, project_info):
