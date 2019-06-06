@@ -2,6 +2,7 @@ from abc import abstractmethod, ABCMeta
 
 from mlflow.entities import ViewType
 from mlflow.store import SEARCH_MAX_RESULTS_DEFAULT
+from pylint.pyreverse.utils import ABSTRACT
 
 
 class AbstractStore:
@@ -238,3 +239,95 @@ class AbstractStore:
         :return: None.
         """
         pass
+
+    #---------------------------------- Added by AgileAI ---------------------------------------------------------
+    @abstractmethod
+    def create_user(self, username, password, email):
+        """
+        :return: user_id (int) for the newly created user if successful, else None.
+        """
+        pass
+    
+    @abstractmethod
+    def sign_in(self, username, password):
+        """
+        :return: user_id(int) if success, else None.
+        """
+        pass
+    
+    @abstractmethod
+    def create_workspace(self, user_id, name, description):
+        """
+        :return: workspace_id (int) for the newly created workspace if successful, else None.
+        """
+        pass
+    
+    @abstractmethod
+    def delete_workspace(self, id):
+        """
+        :return: true or false
+        """
+        pass
+    
+    @abstractmethod
+    def get_workspace(self, id):
+        """
+        :return: :py:class: `mlflow.entities.Workspace`
+        """
+        pass
+    
+    @abstractmethod
+    def list_workspace(self, user_id):
+        """
+        :return: List of :py:class `mlflow.entities.WorkspaceInfo`
+        """
+        pass
+    
+    @abstractmethod
+    def create_project(self, workspace_id, name, description):
+        """
+        :return workspace_id (int) for the newly created workspace if successful, else None.
+        """
+        pass
+    
+    @abstractmethod
+    def delete_project(self, id):
+        """
+        :return: true or false
+        """
+        pass
+    
+    @abstractmethod
+    def get_project(self, id):
+        """
+        :return: :py:class: `mlflow.entities.Project`
+        """
+        pass
+    
+    @abstractmethod
+    def list_project(self, workspace_id):
+        """
+        :return: List of :py:class `mlflow.entities.ProjectInfo`
+        """
+        pass
+    
+    
+    
+    
+            
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
