@@ -1163,7 +1163,7 @@ message ProjectInfo {
   optional int32 id = 1;
   optional string name = 2;
   optional string desc = 3;
-  //the number of experiment belong to thiw project
+  //the number of experiment belong to this project
   optional int32 num_of_experiment = 4;
 }
 
@@ -1189,6 +1189,13 @@ message Workspace {
   optional WorkspaceInfo info = 1;
   //list of projects belong to this workspace
   repeated ProjectInfo project_info = 2;
+}
+
+message UserInfo {
+  optional string username = 1;
+  optional string email = 2;
+  optional string api_key = 3;
+  optional int64 register_time = 4;
 }
 
 message CreateOnlineUser {
@@ -1224,8 +1231,7 @@ message GetOnlineUser {
   optional int32 id = 1 [(validate_required) = true];
 
   message Response {
-    optional string username = 1;
-    optional string email = 2;
+    optional UserInfo user_info = 1;
   }
 }
 
@@ -1254,7 +1260,7 @@ message SignIn {
     optional int32 user_id = 1;
     // if sign_in_result is True, workspace_list should be returned
     //optional WorkspaceInfoList workspace_list = 2;
-    repeated WorkspaceInfo ws_info_list = 2;
+    //repeated WorkspaceInfo ws_info_list = 2;
   }
 }
 
@@ -1306,7 +1312,7 @@ message UpdateWorkspace {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
   optional int32 id = 1 [(validate_required) = true];
-  optional string name = 2
+  optional string name = 2;
   optional string desc = 3;
 
   message Response {
