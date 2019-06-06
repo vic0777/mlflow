@@ -47,6 +47,7 @@ class SqlOnlineUser(Base):
     password = Column(String(256), nullable=False)
     email = Column(String(50), unique=True, nullable=False)
     api_key = Column(String(50), unique=True, nullable=False)
+    register_time = Column(BigInteger, default=int(time.time()))
     
     __table_args__ = (
         PrimaryKeyConstraint('user_id', name='online_user_pk'),
@@ -74,6 +75,7 @@ class SqlWorkspace(Base):
     user_id: 外键， online_user表的user_id列
     """
     description = Column(String(1000))
+    create_time = Column(BigInteger, default=int(time.time()))
     
     __table_args__ = (
         PrimaryKeyConstraint('workspace_id', name='workspace_pk'),
@@ -98,6 +100,7 @@ class SqlProject(Base):
          同一个workspace的project不能有重名的，不同workspace的不限制。要在程序代码里进行约束。
     """
     description = Column(String(1000))
+    create_time = Column(BigInteger, default=int(time.time()))
     
     __table_args__ = (
         PrimaryKeyConstraint('project_id', name='project_pk'),
@@ -134,6 +137,7 @@ class SqlExperiment(Base):
     Lifecycle Stage of experiment: `String` (limit 32 characters).
                                     Can be either ``active`` (default) or ``deleted``.
     """
+    create_time = Column(BigInteger, default=int(time.time()))
 
     __table_args__ = (
         CheckConstraint(
