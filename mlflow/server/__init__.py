@@ -1,3 +1,5 @@
+#encoding:utf-8
+
 import os
 import shlex
 
@@ -52,6 +54,9 @@ def _run_server(file_store_path, default_artifact_root, host, port, workers, sta
                 gunicorn_opts):
     """
     Run the MLflow server, wrapping it in gunicorn
+         通过gunicorn(web server)+Flask(web framework)的方式实现Rest接口，利用了python的wsgi技术( web server gateway interface)
+         每个rest请求的具体实现在mlflow.server.handlers中。
+         
     :param static_prefix: If set, the index.html asset will be served from the path static_prefix.
                           If left None, the index.html asset will be served from the root path.
     :return: None

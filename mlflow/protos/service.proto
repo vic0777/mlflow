@@ -1328,7 +1328,7 @@ message CreateProject {
   optional string desc = 3;
 
   message Response {
-    optional bool result = 1;
+    optional int32 id = 1;
   }
 }
 

@@ -1,3 +1,4 @@
+#encoding:utf-8
 # Define all the service endpoint handlers here.
 import json
 import os
@@ -14,12 +15,15 @@ from mlflow.protos import databricks_pb2
 from mlflow.protos.service_pb2 import CreateExperiment, MlflowService, GetExperiment, \
     GetRun, SearchRuns, ListArtifacts, GetMetricHistory, CreateRun, \
     UpdateRun, LogMetric, LogParam, SetTag, ListExperiments, \
-    DeleteExperiment, RestoreExperiment, RestoreRun, DeleteRun, UpdateExperiment, LogBatch
+    DeleteExperiment, RestoreExperiment, RestoreRun, DeleteRun, UpdateExperiment, LogBatch,\
+    CreateOnlineUser, DeleteOnlineUser, GetOnlineUser, UpdateOnlineUser, SignIn,\
+    CreateWorkspace
 from mlflow.store.artifact_repository_registry import get_artifact_repository
 from mlflow.tracking.utils import _is_database_uri, _is_local_uri
 from mlflow.utils.proto_json_utils import message_to_json, parse_dict
 from mlflow.utils.search_utils import SearchFilter
 from mlflow.utils.validation import _validate_batch_log_api_req
+from pandas.tests.io.test_gbq import _get_project_id
 
 _store = None
 
@@ -377,7 +381,55 @@ def get_endpoints():
                 ret.append((http_path, handler, [endpoint.method]))
     return ret
 
+#------------------------------ Added by AgileAI ---------------------------------------
+@catch_mlflow_exception
+def _create_online_user():
+    request_msg = _get_request_message(CreateOnlineUser())
+    result = _get_store().create_user(username=request_msg.username, 
+                                           password=request_msg.password, email=request_msg.email)
 
+    response_msg = CreateOnlineUser.Response()
+    response_msg.result = result
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    return response
+
+@catch_mlflow_exception
+def _delete_online_user():
+
+
+@catch_mlflow_exception
+def _get_online_user():
+    
+    
+@catch_mlflow_exception
+def _update_online_user():
+    
+    
+@catch_mlflow_exception
+def _sign_in():
+    request_msg = _get_request_message(SignIn())
+    user_id = _get_store().sign_in(username=request_msg.username, password=request_msg.password)
+    workspace_info_list = _get_store().get_workspace(user_id)
+    
+    response_msg = SignIn.Response()
+    response_msg.user_id = user_id
+    response_msg.ws_info_list.extend([w.to_proto() for w in workspace_info_list])
+    
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    return response
+
+@catch_mlflow_exception    
+def _create_workspace():
+    request_msg = _get_request_message(CreateWorkspace)
+    workspace_id = _get_store().create_workspace(user_id=request_msg.user_id, name, desc)
+
+
+
+
+
+#protobuf消息类型和handler的对应，为什么不是URL后缀和handler的对应？
 HANDLERS = {
     CreateExperiment: _create_experiment,
     GetExperiment: _get_experiment,
@@ -397,4 +449,21 @@ HANDLERS = {
     ListArtifacts: _list_artifacts,
     GetMetricHistory: _get_metric_history,
     ListExperiments: _list_experiments,
+    
+    #----------------------------------- added by AgileAI -----------------------------------------
+    CreateOnlineUser: _create_online_user
+    DeleteOnlineUser: _delete_online_user
+    GetOnlineUser: _get_online_user
+    UpdateOnlineUser: _update_online_user
+    SignIn: _sign_in
+    CreateWorkspace: _create_workspace
+    DeleteWorkspace: _delete_workspace
+    ListWorkspace: _list_workspace
+    GetWorkspace: _get_workspace
+    UpdateWorkspace: _update_workspace
+    CreateProject: _create_project
+    DeleteProject: _delete_project
+    ListProject: _list_project
+    GetProject: _get_project
+    UpdateProject: _update_project
 }

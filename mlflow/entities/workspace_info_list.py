@@ -8,6 +8,7 @@ from mlflow.entities._mlflow_object import _MLflowObject
 from mlflow.protos.service_pb2 import WorkspaceInfoList as ProtoWorkspaceInfoList
 from mlflow.entities.workspace_info import WorkspaceInfo
 
+
 class WorkspaceInfoList(_MLflowObject):
     """
     List of metadata of workspaces belong to a user, such as workspace name, desc, and number of project 

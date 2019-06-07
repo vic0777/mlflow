@@ -11,10 +11,13 @@ import sqlalchemy
 from mlflow.entities.lifecycle_stage import LifecycleStage
 from mlflow.store import SEARCH_MAX_RESULTS_THRESHOLD
 from mlflow.store.dbmodels.db_types import MYSQL
-from mlflow.store.dbmodels.models import Base, SqlExperiment, SqlRun, SqlMetric, SqlParam, SqlTag, SqlOnlineUser, SqlProject, SqlWorkspace
+from mlflow.store.dbmodels.models import Base, SqlExperiment, SqlRun, SqlMetric, SqlParam, SqlTag, \
+    SqlWorkspace, SqlProject
+from mlflow.entities.workspace_info import WorkspaceInfo, \
+    SqlOnlineUser, SqlProject, SqlWorkspace
 from mlflow.entities import RunStatus, SourceType, Experiment
 from mlflow.store.abstract_store import AbstractStore
-from mlflow.entities import ViewType
+from mlflow.entities import ViewType, WorkspaceInfo
 from mlflow.exceptions import MlflowException
 from mlflow.protos.databricks_pb2 import INVALID_PARAMETER_VALUE, RESOURCE_ALREADY_EXISTS, \
     INVALID_STATE, RESOURCE_DOES_NOT_EXIST, INTERNAL_ERROR
@@ -538,6 +541,10 @@ class SqlAlchemyStore(AbstractStore):
         return False    
 
     def create_user(self, username, password, email):
+        """
+                    在网站上创建一个用户。如果成功，返回True；失败会抛出异常
+        """
+        
         #TODO: 除了判空，还应该加入更多的合法性检查，保证数据库中的字段没问题
         if self._isEmpty(username) or self._isEmpty(password) or self._isEmpty(email):
             raise MlflowException("username, password, and email cannot be empty")
@@ -550,7 +557,9 @@ class SqlAlchemyStore(AbstractStore):
             except sqlalchemy.exc.IntegrityError as e:
                 raise MlflowException('User(name={}) already exists. '
                                       'Error: {}'.format(username, str(e)), RESOURCE_ALREADY_EXISTS)
-                
+            session.flush()
+            return True    
+    
     def sign_in(self, username, password):
         with self.ManagedSessionMaker() as session:
             users = session.query(SqlOnlineUser).filter(SqlOnlineUser.username == username).all()
@@ -566,12 +575,53 @@ class SqlAlchemyStore(AbstractStore):
     def get_workspace(self, user_id):
         """
         return all the workspace belong to the user
-        :rtype: :py:class: `mlflow.entities.WorkspaceInfoList`
+        :rtype: List of :py:class: `mlflow.entities.WorkspaceInfo`
         """
+        ws_info_list = []
+        
         with self.ManagedSessionMaker() as session:
-            workspaces = session.query(SqlWorkspace).filter(SqlWorkspace.user_id = user_id).all()
+            #1. 得到user_id对应的所有workspace
+            workspaces = session.query(SqlWorkspace).filter(SqlWorkspace.user_id == user_id).all()
+            num_of_project_list = []
+            
+            #2. 查询project表，得到每个workspace对应的project数目，设置到num_of_project_list。如果project表中
+            #没有某个workspace对应的记录，则在num_of_project_list中写入0.
+            for ws in workspaces:
+                #执行类似于：select sum() from t1 where age > 30
+            
+            
+            
+            
+            
+            #2. 构造WorkspaceInfo，设置除project数目外的其它字段。加入列表
+            for ws in workspaces:
+                ws_info_list.append(WorkspaceInfo())
+            
+            #3. 查询project表，得到每个workspace对应的project数目，设置到WorkspaceInfo里
+            
+            
+            
     
     def create_workspace(self, user_id, name, desc):
+        #TODO: 除了判空，还应该加入更多的合法性检查，保证数据库中的字段没问题
+        if self._isEmpty(name):
+            raise MlflowException("workspace name cannot be empty")
+    
+        with self.ManagedSessionMaker() as session:
+            try:
+                workspace = SqlWorkspace(userid=user_id, name=name, description=desc)
+                session.add(workspace)
+            #TODO 这段代码有问题，建表的时候并没有约束name唯一。只需保证同一个用户下的workspace name唯一性即可。
+            except sqlalchemy.exc.IntegrityError as e:
+                raise MlflowException('Workspace(name={}) already exists. '
+                                      'Error: {}'.format(name, str(e)), RESOURCE_ALREADY_EXISTS)
+    
+    def delete_workspace(self, workspace_id):
+        """
+                   删除一个workspace,并把属于该workspace的所有元素（project, experiment和run）一起删除。
+        """
+        
+        
         
                 
     def get_project(self, workspace_id):
@@ -579,12 +629,29 @@ class SqlAlchemyStore(AbstractStore):
         return all the projects belong to the workspace
         :rtype: List of :py:class:`mlflow.entities.`
         """
+        with self.ManagedSessionMaker() as session:
+            
     
     def create_project(self, workspace_id, name, desc):
+        #TODO: 除了判空，还应该加入更多的合法性检查，保证数据库中的字段没问题
+        if self._isEmpty(name):
+            raise MlflowException("project name cannot be empty")
     
+        with self.ManagedSessionMaker() as session:
+            try:
+                project = SqlProject(workspace_id=workspace_id, name=name, description=desc)
+                session.add(project)
+            #TODO 这段代码有问题，建表的时候并没有约束name唯一。只需保证同一个workspace（或用户）下的project name唯一性即可。
+            except sqlalchemy.exc.IntegrityError as e:
+                raise MlflowException('Project(name={}) already exists. '
+                                      'Error: {}'.format(name, str(e)), RESOURCE_ALREADY_EXISTS)
                 
-                              
+    def delete_project(self, project_id):
+        """
+                   删除一个project，并把属于该project的所有元素（experiment和experiment下的run）一起删除。
+        """                          
             
+    
             
             
             
