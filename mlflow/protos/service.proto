@@ -1152,7 +1152,7 @@ message LogBatch {
 
 //-------------------------------------  Messages for AgileAI  --------------------------------------------------------
 message ExperimentInfo {
-  optional int32 id = 1;
+  optional int32 experiment_id = 1;
   optional string name = 2;
   optional string desc = 3;
   //the number of run belong to this experiment
@@ -1160,7 +1160,7 @@ message ExperimentInfo {
 }
 
 message ProjectInfo {
-  optional int32 id = 1;
+  optional int32 project_id = 1;
   optional string name = 2;
   optional string desc = 3;
   //the number of experiment belong to this project
@@ -1173,7 +1173,7 @@ message Project {
 }
 
 message WorkspaceInfo {
-  optional int32 id = 1;
+  optional int32 workspace_id = 1;
   optional string name = 2;
   //description of the workspace
   optional string desc = 3;
@@ -1192,10 +1192,11 @@ message Workspace {
 }
 
 message User {
-  optional string username = 1;
-  optional string email = 2;
-  optional string api_key = 3;
-  optional int64 register_time = 4;
+  optional int32 user_id = 1;
+  optional string username = 2;
+  optional string email = 3;
+  optional string api_key = 4;
+  optional int64 register_time = 5;
 }
 
 message CreateOnlineUser {
@@ -1210,14 +1211,14 @@ message CreateOnlineUser {
 
 
   message Response {
-    optional int32 id = 1;
+    optional int32 user_id = 1;
   }
 }
 
 message DeleteOnlineUser {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 user_id = 1 [(validate_required) = true];
 
   message Response {
     // true or false
@@ -1228,7 +1229,7 @@ message DeleteOnlineUser {
 message GetOnlineUser {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 user_id = 1 [(validate_required) = true];
 
   message Response {
     optional User user = 1;
@@ -1238,7 +1239,7 @@ message GetOnlineUser {
 message UpdateOnlineUser {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 user_id = 1 [(validate_required) = true];
   optional string username = 2;
   optional string password = 3;
   optional string email = 4;
@@ -1273,14 +1274,14 @@ message CreateWorkspace {
 
   message Response {
     //required bool result = 1;
-    optional int32 id = 1;
+    optional int32 workspace_id = 1;
   }
 }
 
 message DeleteWorkspace {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 workspace_id = 1 [(validate_required) = true];
 
   message Response {
     optional bool result = 1;
@@ -1301,7 +1302,7 @@ message ListWorkspace {
 message GetWorkspace {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 workspace_id = 1 [(validate_required) = true];
 
   message Response {
     optional Workspace workspace = 1;
@@ -1311,7 +1312,7 @@ message GetWorkspace {
 message UpdateWorkspace {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 workspace_id = 1 [(validate_required) = true];
   optional string name = 2;
   optional string desc = 3;
 
@@ -1328,14 +1329,14 @@ message CreateProject {
   optional string desc = 3;
 
   message Response {
-    optional int32 id = 1;
+    optional int32 project_id = 1;
   }
 }
 
 message DeleteProject {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 project_id = 1 [(validate_required) = true];
 
   message Response {
     optional bool result = 1;
@@ -1355,7 +1356,7 @@ message ListProject {
 message GetProject {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 project_id = 1 [(validate_required) = true];
 
   message Response {
     optional Project project = 1;
@@ -1365,7 +1366,7 @@ message GetProject {
 message UpdateProject {
   option (scalapb.message).extends = "com.databricks.rpc.RPC[$this.Response]";
 
-  optional int32 id = 1 [(validate_required) = true];
+  optional int32 project_id = 1 [(validate_required) = true];
   optional string name = 2;
   optional string desc = 3;
 
