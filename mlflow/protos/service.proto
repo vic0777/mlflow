@@ -1191,7 +1191,7 @@ message Workspace {
   repeated ProjectInfo project_info = 2;
 }
 
-message UserInfo {
+message User {
   optional string username = 1;
   optional string email = 2;
   optional string api_key = 3;
@@ -1231,7 +1231,7 @@ message GetOnlineUser {
   optional int32 id = 1 [(validate_required) = true];
 
   message Response {
-    optional UserInfo user_info = 1;
+    optional User user = 1;
   }
 }
 
