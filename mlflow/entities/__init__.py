@@ -28,5 +28,11 @@ __all__ = [
     "RunTag",
     "SourceType",
     "ViewType",
-    "LifecycleStage"
+    "LifecycleStage",
+    "Project",
+    "ProjectInfo",
+    "Workspace",
+    "WorkspaceInfo",
+    "User",
+    "ExperimentInfo"
 ]
