@@ -15,6 +15,12 @@ from mlflow.entities.run_tag import RunTag
 from mlflow.entities.source_type import SourceType
 from mlflow.entities.view_type import ViewType
 from mlflow.entities.lifecycle_stage import LifecycleStage
+from mlflow.entities.project import Project
+from mlflow.entities.project_info import ProjectInfo
+from mlflow.entities.workspace import Workspace
+from mlflow.entities.workspace_info import WorkspaceInfo
+from mlflow.entities.user import User
+from mlflow.entities.experiment_info import ExperimentInfo
 
 __all__ = [
     "Experiment",
