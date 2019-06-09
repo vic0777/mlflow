@@ -11,7 +11,7 @@ from mlflow.protos.service_pb2 import User as ProtoUser
 class User(_MLflowObject):
     def __init__(self, user_id, username, email, api_key, register_time):
         """_register_time: in number of milliseconds since the UNIX epoch."""
-        self._user_id = id
+        self._user_id = user_id
         self._username = username
         self._email = email
         self._api_key = api_key

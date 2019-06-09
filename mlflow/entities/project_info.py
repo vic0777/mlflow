@@ -9,15 +9,21 @@ from mlflow.entities._mlflow_object import _MLflowObject
 from mlflow.protos.service_pb2 import ProjectInfo as ProtoProjectInfo
 
 class ProjectInfo(_MLflowObject):
-    def __init__(self, id, name, desc, num_of_experiment):
-        self._id = id
+    def __init__(self, project_id, workspace_id, name, desc, num_of_experiment, create_time):
+        self._project_id = project_id
+        self._workspace_id = workspace_id
         self._name = name
         self._desc = desc
         self._num_of_experiment = num_of_experiment
+        self._create_time = create_time
     
     @property
-    def id(self):
-        return self._id
+    def workspace_id(self):
+        return self._workspace_id
+    
+    @property
+    def project_id(self):
+        return self._project_id
     
     @property
     def name(self):
@@ -31,15 +37,22 @@ class ProjectInfo(_MLflowObject):
     def num_of_experiment(self):
         return self._num_of_experiment
     
+    @property
+    def create_time(self):
+        return self._create_time
+    
     @classmethod
     def from_proto(cls, proto):
-        return cls(proto.id, proto.name, proto.desc, proto.num_of_experiment)
+        return cls(proto.project_id, proto.workspace_id, proto.name, proto.desc, 
+                   proto.num_of_experiment, proto.create_time)
     
     def to_proto(self):
         proto = ProtoProjectInfo()
-        proto.id = self.id
+        proto.project_id = self.project_id
+        proto.workspace_id = self.workspace_id
         proto.name = self.name
         proto.desc = self.desc
         proto.num_of_experiment = self.num_of_experiment
+        proto.create_time = self.create_time
         
         return proto
