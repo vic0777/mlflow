@@ -1153,18 +1153,20 @@ message LogBatch {
 //-------------------------------------  Messages for AgileAI  --------------------------------------------------------
 message ExperimentInfo {
   optional int32 experiment_id = 1;
-  optional string name = 2;
-  optional string desc = 3;
+  optional int32 project_id = 2;
+  optional string name = 3;
+  optional string desc = 4;
   //the number of run belong to this experiment
-  optional int32 num_of_run = 4;
+  optional int32 num_of_run = 5;
 }
 
 message ProjectInfo {
   optional int32 project_id = 1;
-  optional string name = 2;
-  optional string desc = 3;
+  optional int32 workspace_id = 2;
+  optional string name = 3;
+  optional string desc = 4;
   //the number of experiment belong to this project
-  optional int32 num_of_experiment = 4;
+  optional int32 num_of_experiment = 5;
 }
 
 message Project {
@@ -1174,11 +1176,12 @@ message Project {
 
 message WorkspaceInfo {
   optional int32 workspace_id = 1;
-  optional string name = 2;
+  optional int32 user_id = 2;
+  optional string name = 3;
   //description of the workspace
-  optional string desc = 3;
+  optional string desc = 4;
   //the number of projects belong to this workspace
-  optional int32 num_of_project = 4;
+  optional int32 num_of_project = 5;
 }
 
 //message WorkspaceInfoList {
