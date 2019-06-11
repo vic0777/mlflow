@@ -38,9 +38,8 @@ class Project(_MLflowObject):
     def from_proto(cls, proto):
         project_info = proto.info
         experiment_info = []
-        for info in proto.experiment_info:
-            experiment_info.append(ExperimentInfo.from_proto(info))
-        
+        experiment_info.extend(ExperimentInfo.from_proto(info) for info in proto.experiment_info)
+                
         return cls(project_info, experiment_info)
     
     def to_proto(self):

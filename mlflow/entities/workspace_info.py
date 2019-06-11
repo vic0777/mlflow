@@ -1,3 +1,4 @@
+#encoding:utf-8
 '''
 Created on 2019/6/3
 
@@ -8,6 +9,8 @@ from mlflow.entities._mlflow_object import _MLflowObject
 from mlflow.protos.service_pb2 import WorkspaceInfo as ProtoWorkspaceInfo
 
 class WorkspaceInfo(_MLflowObject):
+    #TODO: 把这个类与Workspace合并，基本重复，无需单独写一个类。
+    
     def __init__(self, workspace_id, user_id, name, desc, num_of_project, create_time):
         self._workspace_id = workspace_id
         self._user_id = user_id        
@@ -18,10 +21,16 @@ class WorkspaceInfo(_MLflowObject):
         
     @property
     def user_id(self):
+        """
+        :return: user id(string)
+        """
         return self._user_id
     
     @property
     def workspace_id(self):
+        """
+        :return: workspace id(string)
+        """
         return self._workspace_id
         
     @property

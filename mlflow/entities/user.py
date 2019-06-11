@@ -19,6 +19,9 @@ class User(_MLflowObject):
         
     @property
     def user_id(self):
+        """
+        :return: user id(string)
+        """
         return self._user_id
     
     @property

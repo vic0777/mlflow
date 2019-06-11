@@ -798,27 +798,29 @@ message Experiment {
   // Unique identifier for the experiment.
   optional string experiment_id = 1;
 
+  optional string project_id = 2;
+
   // Human readable name that identifies the experiment.
-  optional string name = 2;
+  optional string name = 3;
 
   // Location where artifacts for the experiment are stored.
-  optional string artifact_location = 3;
+  optional string artifact_location = 4;
 
   // Current life cycle stage of the experiment: "active" or "deleted".
   // Deleted experiments are not returned by APIs.
-  optional string lifecycle_stage = 4;
+  optional string lifecycle_stage = 5;
 
   // Last update time
-  optional int64 last_update_time = 5;
+  optional int64 last_update_time = 6;
 
   // Creation time
-  optional int64 creation_time = 6;
+  optional int64 creation_time = 7;
 
-  optional string desc = 7;
+  optional string desc = 8;
 
-  optional int32 num_of_run = 8;
+  //optional int32 num_of_run = 9;
 
-  repeated RunInfo run_info = 9;
+  repeated RunInfo run_info = 10;
 }
 
 message CreateExperiment {

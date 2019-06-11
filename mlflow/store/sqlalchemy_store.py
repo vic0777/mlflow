@@ -12,9 +12,7 @@ from mlflow.entities.lifecycle_stage import LifecycleStage
 from mlflow.store import SEARCH_MAX_RESULTS_THRESHOLD
 from mlflow.store.dbmodels.db_types import MYSQL
 from mlflow.store.dbmodels.models import Base, SqlExperiment, SqlRun, SqlMetric, SqlParam, SqlTag, \
-    SqlWorkspace, SqlProject
-from mlflow.entities.workspace_info import WorkspaceInfo, \
-    SqlOnlineUser, SqlProject, SqlWorkspace
+    SqlWorkspace, SqlProject, SqlOnlineUser
 from mlflow.entities import RunStatus, SourceType, Experiment
 from mlflow.store.abstract_store import AbstractStore
 from mlflow.entities import ViewType, WorkspaceInfo
@@ -29,6 +27,7 @@ from mlflow.store.db.utils import _upgrade_db, _get_alembic_config, _get_schema_
 from mlflow.store.dbmodels.initial_models import Base as InitialBase
 from _ast import Try
 from user.api_key import ApiKey
+from docs.source.conf import project
 
 _logger = logging.getLogger(__name__)
 
@@ -542,7 +541,7 @@ class SqlAlchemyStore(AbstractStore):
 
     def create_user(self, username, password, email):
         """
-                    在网站上创建一个用户。如果成功，返回True；失败会抛出异常
+                    在网站上创建一个用户。如果成功，返回 user_id(string)；失败会抛出异常
         """
         
         #TODO: 除了判空，还应该加入更多的合法性检查，保证数据库中的字段没问题
@@ -558,9 +557,29 @@ class SqlAlchemyStore(AbstractStore):
                 raise MlflowException('User(name={}) already exists. '
                                       'Error: {}'.format(username, str(e)), RESOURCE_ALREADY_EXISTS)
             session.flush()
-            return True    
+            return str(user.user_id)
+    
+    def delete_user(self, user_id):
+        """
+        TODO: 删除属于该用户的workspace, project, experiment。。。
+        """
+        with self.ManagedSessionMaker() as session:
+            users = session.query(SqlOnlineUser).filter_by(SqlOnlineUser.user_id == user_id).all()
+            for user in users:
+                session.delete(user)
+            session.commit()
+        return True
+        
+    def get_user(self, user_id):
+        pass
+    
+    def update_user(self, user_id, username, password, email):
+        pass
     
     def sign_in(self, username, password):
+        """
+        :return: user_id(string)
+        """
         with self.ManagedSessionMaker() as session:
             users = session.query(SqlOnlineUser).filter(SqlOnlineUser.username == username).all()
             
@@ -572,66 +591,62 @@ class SqlAlchemyStore(AbstractStore):
             
         return users[0].user_id
     
-    def get_workspace(self, user_id):
+    def create_workspace(self, user_id, name, description):
         """
-        return all the workspace belong to the user
-        :rtype: List of :py:class: `mlflow.entities.WorkspaceInfo`
-        """
-        ws_info_list = []
-        
-        with self.ManagedSessionMaker() as session:
-            #1. 得到user_id对应的所有workspace
-            workspaces = session.query(SqlWorkspace).filter(SqlWorkspace.user_id == user_id).all()
-            num_of_project_list = []
-            
-            #2. 查询project表，得到每个workspace对应的project数目，设置到num_of_project_list。如果project表中
-            #没有某个workspace对应的记录，则在num_of_project_list中写入0.
-            for ws in workspaces:
-                #执行类似于：select sum() from t1 where age > 30
-            
-            
-            
-            
-            
-            #2. 构造WorkspaceInfo，设置除project数目外的其它字段。加入列表
-            for ws in workspaces:
-                ws_info_list.append(WorkspaceInfo())
-            
-            #3. 查询project表，得到每个workspace对应的project数目，设置到WorkspaceInfo里
-            
-            
-            
-    
-    def create_workspace(self, user_id, name, desc):
-        #TODO: 除了判空，还应该加入更多的合法性检查，保证数据库中的字段没问题
-        if self._isEmpty(name):
-            raise MlflowException("workspace name cannot be empty")
-    
+        :return: workspace_id(string), or throws exception
+        """ 
+        if self._isEmpty(user_id) or self._isEmpty(name):
+            raise MlflowException("user_id or workspace name is null")       
         with self.ManagedSessionMaker() as session:
             try:
-                workspace = SqlWorkspace(userid=user_id, name=name, description=desc)
+                workspace = SqlWorkspace(name=name, user_id=user_id, description=description)
                 session.add(workspace)
             #TODO 这段代码有问题，建表的时候并没有约束name唯一。只需保证同一个用户下的workspace name唯一性即可。
             except sqlalchemy.exc.IntegrityError as e:
                 raise MlflowException('Workspace(name={}) already exists. '
                                       'Error: {}'.format(name, str(e)), RESOURCE_ALREADY_EXISTS)
-    
+            session.flush()            
+            return str(workspace.workspace_id)
+        
     def delete_workspace(self, workspace_id):
         """
                    删除一个workspace,并把属于该workspace的所有元素（project, experiment和run）一起删除。
         """
-        
-        
-        
-                
-    def get_project(self, workspace_id):
-        """
-        return all the projects belong to the workspace
-        :rtype: List of :py:class:`mlflow.entities.`
-        """
-        with self.ManagedSessionMaker() as session:
-            
+        pass
     
+    def get_workspace(self, workspace_id):
+        """
+        :return: :py:class:`mlflow.entities.Workspace`
+        """        
+        with self.ManagedSessionMaker() as session:
+            sql_workspace = session.query(SqlWorkspace).filter(SqlWorkspace.workspace_id == 
+                                                               workspace_id).all()
+            if len(sql_workspace) == 0:
+                raise MlflowException('Workspace with id={} not found.'.format(workspace_id), 
+                                      RESOURCE_DOES_NOT_EXIST)
+            
+            if len(sql_workspace) > 1:
+                raise MlflowException('Expected only one workspace with id={}. Found {}.'.
+                                      format(workspace_id, len(sql_workspace)), INVALID_STATE)
+            
+            return sql_workspace._to_mlflow_entity()
+         
+    def list_workspace(self, user_id):
+        """
+        return all the workspace belong to the user
+        :return: List of :py:class: `mlflow.entities.WorkspaceInfo`
+        """
+        ws_info_list = []
+        
+        with self.ManagedSessionMaker() as session:            
+            workspaces = session.query(SqlWorkspace).filter(SqlWorkspace.user_id == user_id).all()
+            ws_info_list.extend([ws._get_workspace_info() for ws in workspaces])
+        
+        return ws_info_list  
+        
+    def update_workspace(self, workspace_id, name, desc):
+        pass                
+        
     def create_project(self, workspace_id, name, desc):
         #TODO: 除了判空，还应该加入更多的合法性检查，保证数据库中的字段没问题
         if self._isEmpty(name):
@@ -649,9 +664,40 @@ class SqlAlchemyStore(AbstractStore):
     def delete_project(self, project_id):
         """
                    删除一个project，并把属于该project的所有元素（experiment和experiment下的run）一起删除。
-        """                          
+        """  
+        pass                        
             
+    def list_project(self, workspace_id):
+        """
+        return all the projects belong to the workspace
+        :rtype: List of :py:class:`mlflow.entities.ProjectInfo`
+        """
+        project_info_list = []
+        
+        with self.ManagedSessionMaker() as session:            
+            projects = session.query(SqlProject).filter(SqlProject.workspace_id == workspace_id).all()
+            project_info_list.extend([project._get_project_info() for project in projects])
+        
+        return project_info_list
     
+    def get_project(self, project_id):
+        """
+        :return: :py:class:`mlflow.entities.Project`
+        """
+        with self.ManagedSessionMaker() as session:
+            sql_project = session.query(SqlProject).filter(SqlProject.project_id == project_id).all()
+            
+            if len(sql_project) == 0:
+                raise MlflowException('Project with id={} not found.'.format(project_id), 
+                                      RESOURCE_DOES_NOT_EXIST)
+            if len(sql_project) > 1:
+                raise MlflowException('Expected only one project with id={}. Found {}'.
+                                      format(project_id, len(sql_project)), INVALID_STATE)
+            
+            return sql_project._to_mlflow_entity()
+          
+    def update_project(self, project_id, name, desc):
+        pass        
             
             
             

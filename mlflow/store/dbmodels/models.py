@@ -8,7 +8,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from mlflow.entities import (
     Experiment, RunTag, Metric, Param, RunData, RunInfo,
-    SourceType, RunStatus, Run, ViewType)
+    SourceType, RunStatus, Run, ViewType, User, Project, Workspace, ProjectInfo, WorkspaceInfo, ExperimentInfo)
 from mlflow.entities.lifecycle_stage import LifecycleStage
 from Demos.win32ts_logoff_disconnected import username
 
@@ -35,13 +35,13 @@ AgileAI新增的表
 """
 class SqlOnlineUser(Base):
     """
-    DB model for users of agileai.com. These are recorded in ``online_user`` table
+    DB model for users of agileai.com. These are recorded in ``online_users`` table
     """
-    __tablename__ = 'online_user'
+    __tablename__ = 'online_users'
     
     user_id = Column(Integer, autoincrement=True)
     """
-    user_id: primary key of table ``online_user``
+    user_id: primary key of table ``online_users``
     """
     username = Column(String(256), unique=True, nullable=False)
     password = Column(String(256), nullable=False)
@@ -56,21 +56,25 @@ class SqlOnlineUser(Base):
     def __repr__(self):
         return '<SqlOnlineUser ({}, {})>'.format(self.user_id, self.username)
     
+    def _to_mlflow_entity(self):
+        return User(user_id=str(self.user_id), username=self.username, email=self.email, 
+                    api_key=self.api_key, register_time=self.register_time)
+    
 class SqlWorkspace(Base):
     """
     DB model for workspace of agileai.com. These are recorded in ``workspace`` table       
     """
-    __tablename__ = 'workspace'
+    __tablename__ = 'workspaces'
     
     workspace_id = Column(Integer, autoincrement=True)
     """
-    workspace_id: primary key of table ``workspace``
+    workspace_id: primary key of table ``workspaces``
     """ 
     name = Column(String(256), nullable=False)
     """
           同一个用户的workspace不能有重名的，不同用户不限制。要在程序代码里进行约束。
     """
-    user_id = Column(Integer, ForeignKey('online_user.user_id'))
+    user_id = Column(Integer, ForeignKey('online_users.user_id'))
     """
     user_id: 外键， online_user表的user_id列
     """
@@ -80,20 +84,41 @@ class SqlWorkspace(Base):
     __table_args__ = (
         PrimaryKeyConstraint('workspace_id', name='workspace_pk'),
     )
+    
+    def __repr__(self):
+        return '<SqlWorkspace ({}, {})>'.format(self.workspace_id, self.name)
         
-
+    def _to_mlflow_entity(self):
+        """
+        :return: :py:class:`mlflow.entities.Workspace`
+        """
+        project_info_list = []
+        project_info_list.extend([project.get_project_info() for project in self.projects])
+        workspace_info = WorkspaceInfo(self.workspace_id, self.user_id, self.name, self.description, 
+                                       len(self.projects), self.create_time)
+        
+        return Workspace(workspace_info, project_info_list)
+    
+    def _get_workspace_info(self):
+        """
+        create a WorkspaceInfo object and return it
+        :return: :py:class:`mlflow.entities.WorkspaceInfo`
+        """
+        return WorkspaceInfo(self.workspace_id, self.user_id, self.name, self.description, 
+                           len(self.projects), self.create_time)        
+        
 class SqlProject(Base):
     """
     DB model for project of agileai.com. These are recorded in ``project`` table
         注意：与mlflow的project不同，这个是网站上的project ！！！。 
     """
 
-    __tablename__ = 'project'
+    __tablename__ = 'projects'
     
     project_id = Column(Integer, autoincrement=True)
-    workspace_id = Column(Integer, ForeignKey('workspace.workspace_id'))
+    workspace_id = Column(Integer, ForeignKey('workspaces.workspace_id'))
     """
-    workspace_id:外键， workspace表的workspace_id列
+    workspace_id:外键， workspaces表的workspace_id列
     """
     name = Column(String(256), nullable=False)
     """
@@ -102,12 +127,35 @@ class SqlProject(Base):
     description = Column(String(1000))
     create_time = Column(BigInteger, default=int(time.time()))
     
+    workspace = relationship('SqlWorkspace', backref=backref('projects', cascade='all'))
+    
     __table_args__ = (
         PrimaryKeyConstraint('project_id', name='project_pk'),
     )
     
+    def __repr__(self):
+        return '<SqlProject ({}, {})>'.format(self.project_id, self.name)
     
+    def _get_project_info(self):
+        """
+        create a ProjectInfo object and return it
+        :return: :py:class:`mlflow.entities.ProjectInfo`
+        """
+        return ProjectInfo(self.project_id, self.workspace_id, self.name, self.description, 
+                           len(self.experiments), self.create_time)
     
+    def _to_mlflow_entity(self):
+        """
+        :return: :py:class: `mlflow.entities.Project`
+        """
+        experiment_info_list = []
+        experiment_info_list.extend([experiment.get_experiment_info() for experiment in self.experiments])
+        project_info = ProjectInfo(self.project_id, self.workspace_id, self.name, self.description, 
+                                       len(self.experiments), self.create_time)
+        
+        return Project(project_info, experiment_info_list)
+        
+        
 """
 ==================================================================================================
 mlflow原有的表
@@ -122,6 +170,7 @@ class SqlExperiment(Base):
     """
     Experiment ID: `Integer`. *Primary Key* for ``experiment`` table.
     """
+    project_id = Column(Integer, ForeignKey('project.project_id'))
     name = Column(String(256), unique=True, nullable=False)
     """
     Experiment name: `String` (limit 256 characters). Defined as *Unique* and *Non null* in
@@ -137,8 +186,11 @@ class SqlExperiment(Base):
     Lifecycle Stage of experiment: `String` (limit 32 characters).
                                     Can be either ``active`` (default) or ``deleted``.
     """
+    description = Column(String(1000))
     create_time = Column(BigInteger, default=int(time.time()))
 
+    project = relationship('SqlProject', backref=backref('experiments', cascade='all'))
+    
     __table_args__ = (
         CheckConstraint(
             lifecycle_stage.in_(LifecycleStage.view_type_to_stages(ViewType.ALL)),
@@ -157,9 +209,20 @@ class SqlExperiment(Base):
         """
         return Experiment(
             experiment_id=str(self.experiment_id),
+            project_id=str(self.project_id),
             name=self.name,
             artifact_location=self.artifact_location,
-            lifecycle_stage=self.lifecycle_stage)
+            lifecycle_stage=self.lifecycle_stage,
+            desc=self.description,
+            create_time=self.create_time)
+    
+    def get_experiment_info(self):
+        """
+        create a ExperimentInfo object and return it
+        :return: :py:class:`mlflow.entities.ExperimentInfo`
+        """
+        return ExperimentInfo(self.experiment_id, self.project_id, self.name, self.description, 
+                           len(self.runs), self.create_time)
 
 
 class SqlRun(Base):

@@ -526,7 +526,7 @@ def _build_mlflow_run_cmd(
     Build and return an array containing an ``mlflow run`` command that can be invoked to locally
     run the project at the specified URI.
     """
-    mlflow_run_arr = ["mlflow", "run", uri, "-e", entry_point, "--run-id", run_id]
+    mlflow_run_arr = ["mlflow", "run", uri, "-e", entry_point, "--run-project_id", run_id]
     if storage_dir is not None:
         mlflow_run_arr.extend(["--storage-dir", storage_dir])
     if not use_conda:
@@ -734,7 +734,7 @@ def _build_docker_image(work_dir, project, active_run):
                                     tag_name)
     tracking.MlflowClient().set_tag(active_run.info.run_id,
                                     MLFLOW_DOCKER_IMAGE_ID,
-                                    image[0].id)
+                                    image[0].project_id)
     return tag_name
 
 

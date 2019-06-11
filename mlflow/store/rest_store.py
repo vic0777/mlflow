@@ -3,7 +3,8 @@ import json
 from mlflow.store import SEARCH_MAX_RESULTS_THRESHOLD
 from mlflow.store.abstract_store import AbstractStore
 
-from mlflow.entities import Experiment, Run, RunInfo, Metric, ViewType
+from mlflow.entities import Experiment, Run, RunInfo, Metric, ViewType, User, \
+    Project, ProjectInfo, Workspace, WorkspaceInfo
 
 from mlflow.utils.proto_json_utils import message_to_json, parse_dict
 from mlflow.utils.rest_utils import http_request, verify_rest_response
@@ -11,8 +12,10 @@ from mlflow.utils.rest_utils import http_request, verify_rest_response
 from mlflow.protos.service_pb2 import CreateExperiment, MlflowService, GetExperiment, \
     GetRun, SearchRuns, ListExperiments, GetMetricHistory, LogMetric, LogParam, SetTag, \
     UpdateRun, CreateRun, DeleteRun, RestoreRun, DeleteExperiment, RestoreExperiment, \
-    UpdateExperiment, LogBatch, CreateOnlineUser, SignIn, CreateWorkspace, DeleteWorkspace, \
-    GetWorkspace, ListWorkspace, CreateProject, DeleteProject, GetProject, ListProject
+    UpdateExperiment, LogBatch, CreateOnlineUser, DeleteOnlineUser, GetOnlineUser, SignIn, \
+    UpdateOnlineUser, CreateWorkspace, DeleteWorkspace, UpdateWorkspace, \
+    GetWorkspace, ListWorkspace, CreateProject, DeleteProject, GetProject, ListProject,\
+    DeleteOnlineUser, UpdateProject
 
 from mlflow.protos import databricks_pb2
 
@@ -100,7 +103,7 @@ class RestStore(AbstractStore):
         """
         Fetch the experiment from the backend store.
 
-        :param experiment_id: String id for the experiment
+        :param experiment_id: String project_id for the experiment
 
         :return: A single :py:class:`mlflow.entities.Experiment` object if it exists,
         otherwise raises an Exception.
@@ -164,7 +167,7 @@ class RestStore(AbstractStore):
         """
         Log a metric for the specified run
 
-        :param run_id: String id for the run
+        :param run_id: String project_id for the run
         :param metric: Metric instance to log
         """
         req_body = message_to_json(LogMetric(
@@ -177,7 +180,7 @@ class RestStore(AbstractStore):
         """
         Log a param for the specified run
 
-        :param run_id: String id for the run
+        :param run_id: String project_id for the run
         :param param: Param instance to log
         """
         req_body = message_to_json(LogParam(
@@ -188,7 +191,7 @@ class RestStore(AbstractStore):
         """
         Set a tag for the specified run
 
-        :param run_id: String id for the run
+        :param run_id: String project_id for the run
         :param tag: RunTag instance to log
         """
         req_body = message_to_json(SetTag(
@@ -250,22 +253,47 @@ class RestStore(AbstractStore):
     
     
     #------------------------------------------- Added by AgileAI ------------------------------------------------------------
-     
     def create_user(self, username, password, email):
         """
         Create a new user. If a user with the given name already exists, throws exception.        
-        :return: user_id (int) for the newly created user if successful, else None.
+        :return: user_id (string) for the newly created user if successful, else None.
         """
         req_body = message_to_json(CreateOnlineUser(username=username, password=password, email=email))
         response_proto = self._call_endpoint(CreateOnlineUser, req_body)
         
-        return response_proto.id
+        return response_proto.user_id
     
+    def delete_user(self, user_id):
+        """
+        :return: true or false
+        """
+        req_body = message_to_json(DeleteOnlineUser(user_id))
+        response_proto = self._call_endpoint(DeleteOnlineUser, req_body)
+        
+        return response_proto.result
+    
+    def get_user(self, user_id):
+        """
+        :return: `mlflow.entities.User`
+        """
+        req_body = message_to_json(GetOnlineUser(user_id))
+        response_proto = self._call_endpoint(GetOnlineUser, req_body)
+        
+        return User.from_proto(response_proto.user)
+            
+    def update_user(self, user_id, username, password, email):
+        """
+        :return: true or false
+        """
+        req_body = message_to_json(UpdateOnlineUser(user_id=user_id, username=username, password=password, email=email))
+        response_proto = self._call_endpoint(UpdateOnlineUser, req_body)
+        
+        return response_proto.result
     
     def sign_in(self, username, password):
         """
         Throws exception if fails.
-        :return: user_id(int) if success.
+        :return: user_id(string) if success.
         """
         req_body = message_to_json(SignIn(username=username, password=password))
         response_proto = self._call_endpoint(SignIn, req_body)
@@ -276,74 +304,85 @@ class RestStore(AbstractStore):
     def create_workspace(self, user_id, name, description):
         """
         Create a new workspace. If a workspace of the user with the given name already exists, throws exception.
-        :return: workspace_id (int) for the newly created workspace if successful, else None.
+        :return: workspace_id (string) for the newly created workspace if successful, else None.
         """
         req_body = message_to_json(CreateWorkspace(user_id=user_id, name=name, description=description))
         response_proto = self._call_endpoint(CreateWorkspace, req_body)
         
-        return response_proto.id
-    
-    
-    def delete_workspace(self, id):
+        return response_proto.workspace_id
+        
+    def delete_workspace(self, workspace_id):
         """
         :return: true or false
         """
-        req_body = message_to_json(DeleteWorkspace(id))
+        req_body = message_to_json(DeleteWorkspace(workspace_id))
         response_proto = self._call_endpoint(DeleteWorkspace, req_body)
         
         return response_proto.result
     
+    def list_workspace(self, user_id):
+        """
+        list all workspaces belong to the user
+        :return: list of `mlflow.entities.WorkspaceInfo`
+        """
+        req_body = message_to_json(ListWorkspace(user_id))
+        response_proto =  self._call_endpoint(ListWorkspace, req_body)
+        
+        workspace_info_list = []
+        workspace_info_list.extend([WorkspaceInfo.from_proto(w) for w in response_proto.ws_info_list])
+        
+        return workspace_info_list
     
-    def get_workspace(self, id):
+    def get_workspace(self, workspace_id):
         """
         If the workspace does not exist, return None.
         :return: :py:class: `mlflow.entities.Workspace`
         """
-        req_body = message_to_json(GetWorkspace(id))
+        req_body = message_to_json(GetWorkspace(workspace_id))
         response_proto = self._call_endpoint(GetWorkspace, req_body)
         
-        return response_proto.workspace
+        return Workspace.from_proto(response_proto.workspace)
     
     
-    def list_workspace(self, user_id):
+    def update_workspace(self, workspace_id, name, desc):
         """
-        :return: List of :py:class `mlflow.entities.WorkspaceInfo` or None.
+        :return: true or false
         """
-        req_body = message_to_json(ListWorkspace(id))
-        response_proto = self._call_endpoint(ListWorkspace, req_body)
+        req_body = message_to_json(UpdateWorkspace(workspace_id=workspace_id, name=name, desc=desc))
+        response_proto = self._call_endpoint(UpdateWorkspace, req_body)
         
-        return response_proto.ws_info_list
+        return response_proto.result
     
     
     def create_project(self, workspace_id, name, description):
         """
         Create a new project. If a project in the workspace with the given name already exists, throws exception.
-        :return project_id (int) for the newly created project if successful, else None.
+        :return project_id (string) for the newly created project if successful, else None.
         """
         req_body = message_to_json(CreateProject(ws_id=workspace_id, name=name, desc=description))
         response_proto = self._call_endpoint(CreateProject, req_body)
         
-        return response_proto.id
+        return response_proto.project_id
     
     
-    def delete_project(self, id):
+    def delete_project(self, project_id):
         """
         :return: true or false
         """
-        req_body = message_to_json(DeleteProject(id))
+        req_body = message_to_json(DeleteProject(project_id))
         response_proto = self._call_endpoint(DeleteProject, req_body)
         
         return response_proto.result
     
     
-    def get_project(self, id):
+    def get_project(self, project_id):
         """
         :return: :py:class: `mlflow.entities.Project` or None.
         """
-        req_body = message_to_json(GetProject(id))
+        req_body = message_to_json(GetProject(project_id))
         response_proto = self._call_endpoint(GetProject, req_body)
         
-        return response_proto.project
+        return Project.from_proto(response_proto.project)
     
     
     def list_project(self, workspace_id):
@@ -353,4 +392,16 @@ class RestStore(AbstractStore):
         req_body = message_to_json(ListProject(workspace_id))
         response_proto = self._call_endpoint(ListProject, req_body)
         
-        return response_proto.project_list
+        project_info_list = []
+        project_info_list.extend([ProjectInfo.from_proto(p) for p in response_proto.project_list])
+        
+        return project_info_list
+    
+    def update_project(self, project_id, name, desc):
+        """
+        :return: true or false
+        """
+        req_body = message_to_json(UpdateProject(project_id=project_id, name=name, desc=desc))
+        response_proto = self._call_endpoint(UpdateProject, req_body)
+        
+        return response_proto.result

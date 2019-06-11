@@ -29,7 +29,7 @@ class Workspace(_MLflowObject):
     def from_proto(cls, proto):
         info = proto.info
         project_info = []
-        project_info.append(ProjectInfo.from_proto(element) for element in proto.project_info)
+        project_info.extend([ProjectInfo.from_proto(element) for element in proto.project_info])
         
         return cls(info, project_info)
     

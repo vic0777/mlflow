@@ -3,6 +3,8 @@ from abc import abstractmethod, ABCMeta
 from mlflow.entities import ViewType
 from mlflow.store import SEARCH_MAX_RESULTS_DEFAULT
 from pylint.pyreverse.utils import ABSTRACT
+from Demos.win32ts_logoff_disconnected import username
+from Demos.security.sspi.validate_password import password
 
 
 class AbstractStore:
@@ -48,7 +50,7 @@ class AbstractStore:
         """
         Fetch the experiment by ID from the backend store.
 
-        :param experiment_id: String id for the experiment
+        :param experiment_id: String project_id for the experiment
 
         :return: A single :py:class:`mlflow.entities.Experiment` object if it exists,
             otherwise raises an exception.
@@ -77,7 +79,7 @@ class AbstractStore:
         Delete the experiment from the backend store. Deleted experiments can be restored until
         permanently deleted.
 
-        :param experiment_id: String id for the experiment
+        :param experiment_id: String project_id for the experiment
         """
         pass
 
@@ -86,7 +88,7 @@ class AbstractStore:
         """
         Restore deleted experiment unless it is permanently deleted.
 
-        :param experiment_id: String id for the experiment
+        :param experiment_id: String project_id for the experiment
         """
         pass
 
@@ -95,7 +97,7 @@ class AbstractStore:
         """
         Update an experiment's name. The new name must be unique.
 
-        :param experiment_id: String id for the experiment
+        :param experiment_id: String project_id for the experiment
         """
         pass
 
@@ -132,7 +134,7 @@ class AbstractStore:
         Create a run under the specified experiment ID, setting the run's status to "RUNNING"
         and the start time to the current time.
 
-        :param experiment_id: String id of the experiment for this run
+        :param experiment_id: String project_id of the experiment for this run
         :param user_id: ID of the user launching this run
 
         :return: The created Run object
@@ -161,7 +163,7 @@ class AbstractStore:
         """
         Log a metric for the specified run
 
-        :param run_id: String id for the run
+        :param run_id: String project_id for the run
         :param metric: :py:class:`mlflow.entities.Metric` instance to log
         """
         self.log_batch(run_id, metrics=[metric], params=[], tags=[])
@@ -170,7 +172,7 @@ class AbstractStore:
         """
         Log a param for the specified run
 
-        :param run_id: String id for the run
+        :param run_id: String project_id for the run
         :param param: :py:class:`mlflow.entities.Param` instance to log
         """
         self.log_batch(run_id, metrics=[], params=[param], tags=[])
@@ -179,7 +181,7 @@ class AbstractStore:
         """
         Set a tag for the specified run
 
-        :param run_id: String id for the run
+        :param run_id: String project_id for the run
         :param tag: :py:class:`mlflow.entities.RunTag` instance to set
         """
         self.log_batch(run_id, metrics=[], params=[], tags=[tag])
@@ -218,7 +220,7 @@ class AbstractStore:
         """
         Return run information for runs which belong to the experiment_id.
 
-        :param experiment_id: The experiment id which to search
+        :param experiment_id: The experiment project_id which to search
 
         :return: A list of :py:class:`mlflow.entities.RunInfo` objects that satisfy the
             search expressions
@@ -231,7 +233,7 @@ class AbstractStore:
         """
         Log multiple metrics, params, and tags for the specified run
 
-        :param run_id: String id for the run
+        :param run_id: String project_id for the run
         :param metrics: List of :py:class:`mlflow.entities.Metric` instances to log
         :param params: List of :py:class:`mlflow.entities.Param` instances to log
         :param tags: List of :py:class:`mlflow.entities.RunTag` instances to log
@@ -249,6 +251,27 @@ class AbstractStore:
         pass
     
     @abstractmethod
+    def delete_user(self, user_id):
+        """
+        :return: true or false
+        """
+        pass
+    
+    @abstractmethod
+    def get_user(self, user_id):
+        """
+        :return: :py:class `mlflow.entities.User`
+        """
+        pass
+    
+    @abstractmethod
+    def update_user(self, user_id, username, password, email):
+        """
+        :return: true or false
+        """
+        pass
+            
+    @abstractmethod
     def sign_in(self, username, password):
         """
         :return: user_id(int) if success, else None.
@@ -263,16 +286,23 @@ class AbstractStore:
         pass
     
     @abstractmethod
-    def delete_workspace(self, id):
+    def delete_workspace(self, workspace_id):
         """
         :return: true or false
         """
         pass
     
     @abstractmethod
-    def get_workspace(self, id):
+    def get_workspace(self, workspace_id):
         """
         :return: :py:class: `mlflow.entities.Workspace`
+        """
+        pass
+    
+    @abstractmethod
+    def update_workspace(self, workspace_id, name, desc):
+        """
+        :return: true or false
         """
         pass
     
@@ -291,14 +321,14 @@ class AbstractStore:
         pass
     
     @abstractmethod
-    def delete_project(self, id):
+    def delete_project(self, project_id):
         """
         :return: true or false
         """
         pass
     
     @abstractmethod
-    def get_project(self, id):
+    def get_project(self, project_id):
         """
         :return: :py:class: `mlflow.entities.Project`
         """
@@ -311,7 +341,12 @@ class AbstractStore:
         """
         pass
     
-    
+    @abstractmethod
+    def update_project(self, project_id, name, desc):
+        """
+        :return: true or false
+        """
+        pass
     
     
             

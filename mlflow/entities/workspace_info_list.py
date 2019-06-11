@@ -27,7 +27,7 @@ class WorkspaceInfoList(_MLflowObject):
     @classmethod
     def from_proto(cls, proto):
         info_list = []
-        info_list.append(WorkspaceInfo.from_proto(proto_info) for proto_info in proto.ws_info)
+        info_list.extend([WorkspaceInfo.from_proto(proto_info) for proto_info in proto.ws_info])
         
         return cls(list)
     

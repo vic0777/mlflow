@@ -17,7 +17,8 @@ from mlflow.protos.service_pb2 import CreateExperiment, MlflowService, GetExperi
     UpdateRun, LogMetric, LogParam, SetTag, ListExperiments, \
     DeleteExperiment, RestoreExperiment, RestoreRun, DeleteRun, UpdateExperiment, LogBatch,\
     CreateOnlineUser, DeleteOnlineUser, GetOnlineUser, UpdateOnlineUser, SignIn,\
-    CreateWorkspace
+    CreateWorkspace, DeleteWorkspace, ListWorkspace, GetWorkspace, UpdateWorkspace, \
+    CreateProject, DeleteProject, ListProject, GetProject, UpdateProject
 from mlflow.store.artifact_repository_registry import get_artifact_repository
 from mlflow.tracking.utils import _is_database_uri, _is_local_uri
 from mlflow.utils.proto_json_utils import message_to_json, parse_dict
@@ -384,47 +385,187 @@ def get_endpoints():
 #------------------------------ Added by AgileAI ---------------------------------------
 @catch_mlflow_exception
 def _create_online_user():
+    # the type of request_msg is CreateOnlineUser(a message in service.proto)
     request_msg = _get_request_message(CreateOnlineUser())
-    result = _get_store().create_user(username=request_msg.username, 
+    user_id = _get_store().create_user(username=request_msg.username, 
                                            password=request_msg.password, email=request_msg.email)
 
     response_msg = CreateOnlineUser.Response()
-    response_msg.result = result
+    response_msg.user_id = user_id
     response = Response(mimetype='application/json')
     response.set_data(message_to_json(response_msg))
     return response
 
 @catch_mlflow_exception
 def _delete_online_user():
-
+    request_msg = _get_request_message(DeleteOnlineUser())
+    result = _get_store().delete_user(request_msg.user_id)
+    
+    response_msg = DeleteOnlineUser.Response()
+    response_msg.result = result
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    return response
 
 @catch_mlflow_exception
 def _get_online_user():
+    request_msg = _get_request_message(GetOnlineUser())
+    response_msg = GetOnlineUser.Response()
+    response_msg.user.MergeFrom(_get_store().get_user(request_msg.user_id).to_proto())
+    
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    return response
     
     
 @catch_mlflow_exception
 def _update_online_user():
+    request_msg = _get_request_message(UpdateOnlineUser())
+    result = _get_store().update_user(user_id=request_msg.user_id, username=request_msg.username, 
+                                      password=request_msg.password, email=request_msg.email)
     
+    response_msg = UpdateOnlineUser.Response()
+    response_msg.result = result
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
     
 @catch_mlflow_exception
 def _sign_in():
     request_msg = _get_request_message(SignIn())
     user_id = _get_store().sign_in(username=request_msg.username, password=request_msg.password)
-    workspace_info_list = _get_store().get_workspace(user_id)
-    
+        
     response_msg = SignIn.Response()
-    response_msg.user_id = user_id
-    response_msg.ws_info_list.extend([w.to_proto() for w in workspace_info_list])
-    
+    response_msg.user_id = user_id     
     response = Response(mimetype='application/json')
     response.set_data(message_to_json(response_msg))
+    
     return response
 
 @catch_mlflow_exception    
 def _create_workspace():
     request_msg = _get_request_message(CreateWorkspace)
-    workspace_id = _get_store().create_workspace(user_id=request_msg.user_id, name, desc)
+    workspace_id = _get_store().create_workspace(user_id=request_msg.user_id, name=request_msg.name, 
+                                                 description=request_msg.description)
+    
+    response_msg = CreateWorkspace.Response()
+    response_msg.workspace_id = workspace_id
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
 
+@catch_mlflow_exception
+def _delete_workspace():
+    request_msg = _get_request_message(DeleteWorkspace())
+    result = _get_store().delete_workspace(request_msg.workspace_id)
+    
+    response_msg = DeleteWorkspace.Response()
+    response_msg.result = result
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+
+@catch_mlflow_exception
+def _list_workspace():
+    request_msg = _get_request_message(ListWorkspace())
+    workspace_info_list = _get_store().list_workspace(request_msg.user_id)
+    
+    response_msg = ListWorkspace.Response()
+    response_msg.ws_info_list.extend([w.to_proto() for w in workspace_info_list])
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+
+@catch_mlflow_exception
+def _get_workspace():
+    request_msg = _get_request_message(GetWorkspace())
+    workspace = _get_store().get_workspace(request_msg.workspace_id)
+    
+    response_msg = GetWorkspace.Response()
+    response_msg.workspace.MergeFrom(workspace.to_proto())
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+    
+@catch_mlflow_exception
+def _update_workspace():
+    request_msg = _get_request_message(UpdateWorkspace())
+    result = _get_store().update_workspace(workspace_id=request_msg.workspace_id, name=request_msg.name,
+                                            desc=request_msg.desc)
+    
+    response_msg = UpdateWorkspace.Response()
+    response_msg.result = result 
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+
+@catch_mlflow_exception
+def _create_project():
+    request_msg = _get_request_message(CreateProject())
+    project_id = _get_store().create_project(workspace_id=request_msg.workspace_id, name=request_msg.name,
+                                              desc=request_msg.desc)
+    
+    response_msg = CreateProject.Response()
+    response_msg.project_id = project_id
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+
+@catch_mlflow_exception
+def _delete_project():
+    request_msg = _get_request_message(DeleteProject())
+    result = _get_store().delete_project(request_msg.project_id)
+    
+    response_msg = DeleteProject.Response()
+    response_msg.result = result
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+
+@catch_mlflow_exception
+def _list_project():
+    request_msg = _get_request_message(ListProject())
+    project_info_list = _get_store().list_project(request_msg.ws_id)
+    
+    response_msg = ListProject.Response()
+    response_msg.project_list.extend([p.to_proto() for p in project_info_list])
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+    
+@catch_mlflow_exception
+def _get_project():
+    request_msg = _get_request_message(GetProject())
+    project = _get_store().get_project(request_msg.project_id)
+    
+    response_msg = GetProject.Response()
+    response_msg.project.MergeFrom(project.to_proto())
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
+
+@catch_mlflow_exception
+def _update_project():
+    request_msg = _get_request_message(UpdateProject())
+    result = _get_store().update_project(project_id=request_msg.project_id, name=request_msg.name, 
+                                         desc=request_msg.desc)
+    
+    response_msg = UpdateProject.Response()
+    response_msg.result = result
+    response = Response(mimetype='application/json')
+    response.set_data(message_to_json(response_msg))
+    
+    return response
 
 
 

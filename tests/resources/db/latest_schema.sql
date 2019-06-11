@@ -10,7 +10,11 @@ CREATE TABLE experiments (
 	name VARCHAR(256) NOT NULL, 
 	artifact_location VARCHAR(256), 
 	lifecycle_stage VARCHAR(32), 
-	CONSTRAINT experiment_pk PRIMARY KEY (experiment_id), 
+	project_id INTEGER NOT NULL,
+	description VARCHAR(256),
+	create_time BIGINT,
+	CONSTRAINT experiment_pk PRIMARY KEY (experiment_id),
+	FOREIGN KEY(project_id) REFERENCES projects (project_id), 
 	UNIQUE (name), 
 	CONSTRAINT experiments_lifecycle_stage CHECK (lifecycle_stage IN ('active', 'deleted'))
 )
@@ -65,4 +69,60 @@ CREATE TABLE tags (
 	CONSTRAINT tag_pk PRIMARY KEY (key, run_uuid), 
 	FOREIGN KEY(run_uuid) REFERENCES runs (run_uuid)
 )
+
+
+/*--------------------------------------- Added by AgileAI-------------------------------------------------------------*/
+CREATE TABLE online_users (
+	user_id INTEGER NOT NULL, 
+	user_name VARCHAR(256) NOT NULL, 
+	password VARCHAR(256) NOT NULL,
+	email VARCHAR(256) NOT NULL,
+	api_key VARCHAR(256) NOT NULL,
+	register_time BIGINT,
+	CONSTRAINT user_pk PRIMARY KEY (user_id), 
+	UNIQUE (name), 
+	UNIQUE (email)	
+)
+
+CREATE TABLE workspaces (
+	workspace_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL,
+	name VARCHAR(256) NOT NULL, 
+	description VARCHAR(256),	
+	create_time BIGINT,
+	CONSTRAINT workspace_pk PRIMARY KEY (workspace_id), 
+	FOREIGN KEY(user_id) REFERENCES online_users (user_id)	
+)
+
+CREATE TABLE projects (
+	project_id INTEGER NOT NULL, 
+	workspace_id INTEGER NOT NULL,
+	name VARCHAR(256) NOT NULL, 
+	description VARCHAR(256),	
+	create_time BIGINT,
+	CONSTRAINT project_pk PRIMARY KEY (project_id), 
+	FOREIGN KEY(workspace_id) REFERENCES workspaces (workspace_id)	
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

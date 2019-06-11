@@ -8,6 +8,8 @@ from mlflow.entities._mlflow_object import _MLflowObject
 from mlflow.protos.service_pb2 import ExperimentInfo as ProtoExperimentInfo
 
 class ExperimentInfo(_MLflowObject):
+    #TODO: 把这个类与Experiment合并，基本重复，无需单独写一个类。
+    
     def __init__(self, experiment_id, project_id, name, desc, num_of_run, create_time):
         self._experiment_id = experiment_id
         self._project_id = project_id
@@ -18,10 +20,16 @@ class ExperimentInfo(_MLflowObject):
     
     @property
     def experiment_id(self):
+        """
+        :return: experiment id(string)
+        """
         return self._experiment_id
     
     @property
     def project_id(self):
+        """
+        :return: project id(string)
+        """
         return self._project_id
         
     @property

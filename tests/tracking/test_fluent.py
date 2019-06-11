@@ -25,9 +25,9 @@ class HelperEnv:
         assert os.environ.get(_EXPERIMENT_ID_ENV_VAR) == exp_id
 
     @classmethod
-    def set_values(cls, id=None, name=None):
-        if id:
-            os.environ[_EXPERIMENT_ID_ENV_VAR] = str(id)
+    def set_values(cls, project_id=None, name=None):
+        if project_id:
+            os.environ[_EXPERIMENT_ID_ENV_VAR] = str(project_id)
         elif os.environ.get(_EXPERIMENT_ID_ENV_VAR):
             del os.environ[_EXPERIMENT_ID_ENV_VAR]
 
@@ -40,7 +40,7 @@ class HelperEnv:
 @pytest.fixture(autouse=True)
 def reset_experiment_id():
     """
-    This fixture resets the active experiment id *after* the execution of the test case in which
+    This fixture resets the active experiment project_id *after* the execution of the test case in which
     its included
     """
     yield
@@ -61,7 +61,7 @@ def test_get_experiment_id_from_env():
 
     # set only ID
     random_id = random.randint(1, 1e6)
-    HelperEnv.set_values(id=random_id)
+    HelperEnv.set_values(project_id=random_id)
     HelperEnv.assert_values(str(random_id), None)
     assert _get_experiment_id_from_env() == str(random_id)
 
@@ -80,7 +80,7 @@ def test_get_experiment_id_from_env():
         exp_id = mlflow.create_experiment(name)
         assert exp_id is not None
         random_id = random.randint(1, 1e6)
-        HelperEnv.set_values(name=name, id=random_id)
+        HelperEnv.set_values(name=name, project_id=random_id)
         HelperEnv.assert_values(str(random_id), name)
         assert _get_experiment_id_from_env() == exp_id
 
@@ -130,7 +130,7 @@ def test_get_experiment_id_in_databricks_with_experiment_defined_in_env_returns_
         exp_name = "random experiment %d" % random.randint(1, 1e6)
         exp_id = mlflow.create_experiment(exp_name)
         notebook_id = str(int(exp_id) + 73)
-        HelperEnv.set_values(id=exp_id)
+        HelperEnv.set_values(project_id=exp_id)
 
     with mock.patch("mlflow.tracking.fluent.is_in_databricks_notebook") as notebook_detection_mock,\
             mock.patch("mlflow.tracking.fluent.get_notebook_id") as notebook_id_mock:
